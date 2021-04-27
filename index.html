@@ -103,30 +103,15 @@
             <div class="autocomplete" style="width: 300px;">
                 <input id="searchInput" type="text" name="mySearchWidget" />
                 <button id="resetBtn">&times;</button>
+                <!-- <div id="searchInputautocomplete-list" class="autocomplete-items"></div> -->
             </div>
         </form>
 
         <script>
-            const mockData = [ 
-                "student on the bus",
-                "useless stuff",
-                "stubhub tickets",
-                "unusual",
-                "user study",
-                " english teacher",
-                "long distant",
-                "search widget",
-                "monkeyking",
-                "make american great again",
-                "working in progress",
-                "passion fruit",
-                "forget the past",
-                "led",
-                "global warming effect",
-                "former president",
-                "keep going",
-                "soft landing",
-                "interest",
+            const mockData = [ "student on the bus", "useless stuff", "stubhub tickets", "unusual", "user study",
+                " english teacher", "long distant", "search widget", "monkeyking", "make american great again",
+                "working in progress", "passion fruit", "forget the past", "led", "global warming effect",
+                "former president", "keep going", "soft landing", "interest",
                 "darkness",
                 "mapkit",
                 "declared war",
@@ -184,8 +169,10 @@
 
             function autocomplete(inp, arr) {
                 /*the autocomplete function takes two arguments,
-    the text field element and an array of possible autocompleted values:*/
-                let currentFocus;
+            the text field element and an array of possible autocompleted values:*/
+                let currentFocus,
+                    offset = 0;
+
 
                 /*execute a function when someone writes in the text field:*/
                 inp.addEventListener("input", function (e) {
@@ -231,6 +218,7 @@
                             closeAllLists();
                         });
                         dropDownContainer.appendChild(suggestedItem);
+                        dropDownContainer.scroll(0,0);
                     });
 
                     const suggestList = document.getElementsByName("autocomplete-item");
@@ -256,6 +244,8 @@
                         currentFocus++;
                         /*and and make the current item more visible:*/
                         addActive(x);
+                        offset = 0; 
+                        x[currentFocus].scroll(0, offset);
                     } else if (pressedKey == 38) {
                         //up
                         /*If the arrow UP key is pressed,
@@ -277,9 +267,12 @@
                         }
                     }
                     //Scrolls with the current focus item
-                    if (x && x[currentFocus]) {
-                        x[currentFocus].scrollIntoView();
-                    }
+                    // console.log(currentFocus);
+                    var listContainer =  document.getElementById("searchInputautocomplete-list");
+                    if(x && x[currentFocus] && !isScrolledElementVisible(x[currentFocus], listContainer)){
+                        var topPosition = x[currentFocus].offsetTop;
+                        listContainer.scrollTop = topPosition;
+        }
                 }
 
                 function addActive(x) {
@@ -319,7 +312,7 @@
             /*initiate the autocomplete function on the "myInput" element, and pass along the countries array as possible autocomplete values:*/
             autocomplete(document.getElementById("searchInput"), mockData);
 
-            /*====Helper Functions For Matching and Creating List of Suggestions====*/
+            /*====Helper Functions for List of suggestions====*/
             function findMatches(wordToMatch, arrayOfWords) {
                 return arrayOfWords.filter((wordToSearch) => {
                     //here we find the word that was searched
@@ -332,10 +325,22 @@
                 return `<span style="font-weight: bold;">${keyword}</span>`;
             }
 
+            // Return true/false if element is visible in relation to a given scrolling container
+            // Use to see if an element is visible within a scrolling div for example.
+            function isScrolledElementVisible(item, list){
+                var listTop = list.scrollTop;
+                var listBottom = listTop + list.offsetHeight;
+                var itemTop = item.offsetTop;
+                var itemBottom = item.offsetTop + item.offsetHeight; 
+                return ((itemBottom >= listTop) && (itemTop <= listBottom)
+                  && (itemBottom <= listBottom) &&  (itemTop >= listTop) );
+            }
+
             /*=====Reset Button=====*/
 
             const searchInput = document.getElementById("searchInput"),
                   resetBtn = document.querySelector("button");
+
 
             //resets the search widget
             const clearSearchInput = () => {
@@ -349,6 +354,8 @@
 
             });
 
+        
+
             //Event listeners when interacting with the reset button
             resetBtn.addEventListener("click", clearSearchInput);
             resetBtn.addEventListener("touchstart", clearSearchInput);
@@ -361,8 +368,7 @@
             /*=======ESC KEY PRESS=======*/
 
             const handleESCKeyPress = () => {
-                const focusInput = document.getElementById("searchInput");
-                searchInput.focus() ? clearSearchInput : focusInput.focus();
+                searchInput.focus() ? clearSearchInput : searchInput.focus();
             };
 
             document.addEventListener("keydown", handleESCKeyPress);
